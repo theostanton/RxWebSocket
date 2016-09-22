@@ -12,7 +12,7 @@ compile 'com.theostanton.rxwebsocket:rxwebsocket:0.1'
 ```
 
 Summary
-_______
+-------
 
 An RX wrapper for java-websocket library. 
 
