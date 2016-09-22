@@ -75,7 +75,7 @@ RxWebSocket.messages(URL).subscribe(new Subscriber<String>() {
 Converts JSON string to POJO
 
 ```java
-RxWebSocket.json(URL,MessageObject.class)
+RxWebSocket.json(URL, MessageObject.class)
     .subscribe(new Subscriber<MessageObject>() {
         @Override
         public void onCompleted() {
