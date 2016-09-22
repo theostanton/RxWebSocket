@@ -22,6 +22,10 @@ Snippets
 
 RxWebSocket.disconnect(URL);
 
+// or
+
+stateSubscription.unsubscribe(); 
+
 ```
 
 ### State subscription
