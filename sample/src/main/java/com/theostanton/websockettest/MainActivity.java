@@ -7,6 +7,7 @@ import android.widget.EditText;
 
 import com.jakewharton.rxbinding.widget.RxTextView;
 import com.theostanton.rxwebsocket.RxWebSocket;
+import com.theostanton.rxwebsocket.State;
 
 import org.java_websocket.client.WebSocketClient;
 
@@ -23,7 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
     WebSocketClient client;
 
-    private String last = "";
+    private long latest = 0L;
+    private String lastMessage = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         client = RxWebSocket.getClient(URL);
 
-        RxTextView.textChanges(editText).debounce(1000, TimeUnit.MILLISECONDS).subscribe(new Subscriber<CharSequence>() {
+        RxTextView.textChanges(editText).debounce(400, TimeUnit.MILLISECONDS).subscribe(new Subscriber<CharSequence>() {
             @Override
             public void onCompleted() {
                 Log.d(TAG, "onCompleted RxTextView");
@@ -47,17 +49,33 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onNext(CharSequence charSequence) {
-                String current = editText.getText().toString();
-                Log.d(TAG, "onTextChanged last=" + last + " current=" + current + " equals=" + last.equals(current));
-                if (last.equals(current)) {
-                    return;
-                }
-                last = current;
-                client.send(MessageObject.create(current));
+                Log.d(TAG,"onNext");
+                send(charSequence.toString());
             }
         });
 
-        RxWebSocket.git json(URL, MessageObject.class)
+        RxWebSocket.connect(URL).subscribe(new Subscriber<State>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                System.out.println("onError " + e.getMessage());
+            }
+
+            @Override
+            public void onNext(State state) {
+                if(state.isOpen()){
+                    System.out.println("Connection opened " + state.getMessage());
+                } else {
+                    System.out.println("Connection closed " + state.getMessage());
+                }
+            }
+        });
+
+        RxWebSocket.json(URL, MessageObject.class)
                 .subscribe(new Subscriber<MessageObject>() {
                     @Override
                     public void onCompleted() {
@@ -71,65 +89,41 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(final MessageObject messageObject) {
-                        String current = editText.getText().toString();
-                        final String message = messageObject.getMessage();
-                        if (message.equals(current)) {
-                            Log.d(TAG, "onNext ignore message=" + message);
-                            return;
-                        } else {
-                            Log.d(TAG, "onNext update message=" + message);
-                        }
+                        Log.d(TAG, "onNext " + messageObject);
 
-                        last = message;
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                editText.setText(message);
-                            }
-                        });
-
+                        set(messageObject);
                     }
                 });
 
-//        RxWebSocket.messages(URL)
-//                .subscribe(new Subscriber<String>() {
-//                    @Override
-//                    public void onCompleted() {
-//                        Log.d(TAG, "onCompleted RxWebSocket");
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.d(TAG, "onError RxWebSocket", e);
-//                    }
-//
-//                    @Override
-//                    public void onNext(final String message) {
-//                        String current = editText.getText().toString();
-//                        if (message.equals(current)) {
-//                            Log.d(TAG, "onNext ignore message=" + message);
-//                            return;
-//                        } else {
-//                            Log.d(TAG, "onNext update message=" + message);
-//                        }
-//
-//                        last = message;
-//                        runOnUiThread(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                editText.setText(message);
-//                            }
-//                        });
-//
-//                    }
-//                });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    private void set(final MessageObject messageObject) {
+        Log.d(TAG,"set " + messageObject);
+        if(messageObject.getTimestamp() > latest){
+            latest = messageObject.getTimestamp();
+            lastMessage = messageObject.getMessage();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    editText.setText(messageObject.getMessage());
+                }
+            });
+        }
+    }
 
-
+    private void send(String message) {
+        Log.d(TAG,"send message=" + message);
+        if (lastMessage.equals(message)) {
+            return;
+        }
+        MessageObject messageObject = MessageObject.create(message);
+        latest = messageObject.getTimestamp();
+        if(client.getConnection().isOpen()) {
+            Log.d(TAG,"send " + messageObject);
+            client.send(messageObject.toJson());
+        } else {
+            Log.e(TAG,"connection is closed");
+        }
     }
 
     @Override

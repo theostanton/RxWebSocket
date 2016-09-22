@@ -23,8 +23,12 @@ public class MessageObject {
         this.timestamp = System.currentTimeMillis();
     }
 
-    public static String create(String message) {
-        return new MessageObject(message).toJson();
+    public static MessageObject create(String message) {
+        return new MessageObject(message);
+    }
+
+    public long getTimestamp() {
+        return timestamp;
     }
 
     public String getMessage() {
