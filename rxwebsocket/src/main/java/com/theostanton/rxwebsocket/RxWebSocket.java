@@ -1,6 +1,5 @@
 package com.theostanton.rxwebsocket;
 
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -51,7 +50,6 @@ public class RxWebSocket {
         }
     }
 
-    @Nullable
     public static RxWebSocketClient getClient(String url){
         return get(url).getClient();
     }

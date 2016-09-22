@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         RxWebSocket.connect(URL).subscribe(new Subscriber<State>() {
             @Override
             public void onCompleted() {

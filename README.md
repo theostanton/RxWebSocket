@@ -5,10 +5,24 @@ Incomplete / Work in progress.
 
 Currently holds instances accessable by URL.
 
-Opens connection on any subscription
+Opens connection on any subscription, if not already open.
+
+Can access WebSocketClient via 
+
+```java 
+WebSocketClient client = RxWebSocket.getClient(URL);
+```
 
 Snippets
 --------
+
+### Close connection
+
+```java
+
+RxWebSocket.disconnect(URL);
+
+```
 
 ### State subscription
 
