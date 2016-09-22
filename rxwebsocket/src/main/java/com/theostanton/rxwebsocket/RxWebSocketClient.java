@@ -1,9 +1,12 @@
 package com.theostanton.rxwebsocket;
 
+import android.util.Log;
+
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
+
 
 /**
  * Created by theostanton on 22/09/2016.
@@ -11,7 +14,10 @@ import java.net.URI;
 
 class RxWebSocketClient extends WebSocketClient {
 
+    private static final String TAG = "RxWebSocketClient";
+
     private MessageListener messageListener;
+    private MessageListener jsonListener;
     private StateListener stateListener;
     private final String url;
 
@@ -21,6 +27,7 @@ class RxWebSocketClient extends WebSocketClient {
     }
 
     public void open() {
+        log("open()");
         try {
             connect();
         } catch (IllegalStateException e) {
@@ -34,16 +41,26 @@ class RxWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake handshakedata) {
-        stateListener.onOpen(handshakedata);
+        log("onOpen() %s", handshakedata.getHttpStatusMessage());
+        if (stateListener != null) {
+            stateListener.onOpen(handshakedata);
+        }
     }
 
     @Override
     public void onMessage(String message) {
-        messageListener.onMessage(message);
+        log("onMessage() %s", message);
+        if (messageListener != null) {
+            messageListener.onMessage(message);
+        }
+        if (jsonListener != null) {
+            jsonListener.onMessage(message);
+        }
     }
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
+        log("onClose()");
         if (stateListener != null) {
             stateListener.onClose(code, reason, remote);
         }
@@ -62,6 +79,14 @@ class RxWebSocketClient extends WebSocketClient {
 
     public void removeMessageListener() {
         this.messageListener = null;
+    }
+
+    public void setJsonListener(MessageListener jsonListener) {
+        this.jsonListener = jsonListener;
+    }
+
+    public void removeJsonListener() {
+        this.jsonListener = null;
     }
 
 
@@ -83,6 +108,10 @@ class RxWebSocketClient extends WebSocketClient {
 
     interface MessageListener {
         void onMessage(String message);
+    }
+
+    private void log(String message, Object... args) {
+        Log.d(TAG, String.format(message, args));
     }
 
     @Override

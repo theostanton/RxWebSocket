@@ -1,5 +1,8 @@
 package com.theostanton.rxwebsocket;
 
+import android.support.annotation.Nullable;
+import android.util.Log;
+
 import java.util.HashMap;
 
 import rx.Observable;
@@ -31,6 +34,7 @@ public class RxWebSocket {
         if(instances.containsKey(url)){
             log("disconnect() exists=true url=%s",url);
             instances.get(url).getClient().close();
+            instances.remove(url);
         } else {
             log("disconnect() exists=false url=%s",url);
         }
@@ -47,14 +51,26 @@ public class RxWebSocket {
         }
     }
 
+    @Nullable
+    public static RxWebSocketClient getClient(String url){
+        return get(url).getClient();
+    }
+
     public static Observable<String> messages(String url) {
         log("messages() url=%s",url);
         return Observable.create(new WebSocketMessageOnSubcribe(get(url).getClient()));
 
     }
 
+    public static <T> Observable<T> json(String url, Class<T> clazz) {
+        log("messages() url=%s",url);
+        return Observable.create(new WebSocketJsonOnSubscribe<T>(get(url).getClient(),clazz));
+
+    }
+
     private static void log(String message, Object... args){
         System.out.println(String.format(message,args));
+        Log.d("RxWebSocket",String.format(message,args));
     }
 
 }

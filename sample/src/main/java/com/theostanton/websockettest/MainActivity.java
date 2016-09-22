@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.EditText;
 
 import com.jakewharton.rxbinding.widget.RxTextView;
+import com.theostanton.rxwebsocket.RxWebSocket;
 
 import org.java_websocket.client.WebSocketClient;
 
@@ -14,6 +15,8 @@ import java.util.concurrent.TimeUnit;
 import rx.Subscriber;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static final String URL = "ws://young-garden-45653.herokuapp.com";
 
     private static final String TAG = "MainActivity";
     private EditText editText;
@@ -28,71 +31,98 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         editText = (EditText) findViewById(R.id.editText);
 
+        client = RxWebSocket.getClient(URL);
 
         RxTextView.textChanges(editText).debounce(1000, TimeUnit.MILLISECONDS).subscribe(new Subscriber<CharSequence>() {
             @Override
             public void onCompleted() {
+                Log.d(TAG, "onCompleted RxTextView");
 
             }
 
             @Override
             public void onError(Throwable e) {
-
+                Log.e(TAG, "onError RxTextView", e);
             }
 
             @Override
             public void onNext(CharSequence charSequence) {
                 String current = editText.getText().toString();
                 Log.d(TAG, "onTextChanged last=" + last + " current=" + current + " equals=" + last.equals(current));
-                if(last.equals(current)){
+                if (last.equals(current)) {
                     return;
                 }
                 last = current;
-                client.send(last);
+                client.send(MessageObject.create(current));
             }
         });
 
-//        client = new WebSocketClient(URI.create("ws://young-garden-45653.herokuapp.com")) {
-//
-//            private static final String TAG = "WebSocketClient";
-//
-//            @Override
-//            public void onOpen(ServerHandshake handshakedata) {
-//                Log.d(TAG, "onOpen");
-//                send("lols");
-//            }
-//
-//            @Override
-//            public void onMessage(final String message) {
-//                Log.d(TAG, "onMessage = " + message);
-//                if(message.equals(editText.getText().toString())){
-//                    return;
-//                }
-//                runOnUiThread(new Runnable() {
+        RxWebSocket.git json(URL, MessageObject.class)
+                .subscribe(new Subscriber<MessageObject>() {
+                    @Override
+                    public void onCompleted() {
+                        Log.d(TAG, "onCompleted RxWebSocket");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d(TAG, "onError RxWebSocket", e);
+                    }
+
+                    @Override
+                    public void onNext(final MessageObject messageObject) {
+                        String current = editText.getText().toString();
+                        final String message = messageObject.getMessage();
+                        if (message.equals(current)) {
+                            Log.d(TAG, "onNext ignore message=" + message);
+                            return;
+                        } else {
+                            Log.d(TAG, "onNext update message=" + message);
+                        }
+
+                        last = message;
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                editText.setText(message);
+                            }
+                        });
+
+                    }
+                });
+
+//        RxWebSocket.messages(URL)
+//                .subscribe(new Subscriber<String>() {
 //                    @Override
-//                    public void run() {
+//                    public void onCompleted() {
+//                        Log.d(TAG, "onCompleted RxWebSocket");
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        Log.d(TAG, "onError RxWebSocket", e);
+//                    }
+//
+//                    @Override
+//                    public void onNext(final String message) {
+//                        String current = editText.getText().toString();
+//                        if (message.equals(current)) {
+//                            Log.d(TAG, "onNext ignore message=" + message);
+//                            return;
+//                        } else {
+//                            Log.d(TAG, "onNext update message=" + message);
+//                        }
+//
 //                        last = message;
-//                        editText.setText(message);
+//                        runOnUiThread(new Runnable() {
+//                            @Override
+//                            public void run() {
+//                                editText.setText(message);
+//                            }
+//                        });
+//
 //                    }
 //                });
-//
-//            }
-//
-//            @Override
-//            public void onClose(int code, String reason, boolean remote) {
-//                Log.d(TAG, "onClose because " + reason);
-//
-//            }
-//
-//            @Override
-//            public void onError(Exception ex) {
-//                Log.e(TAG, "onError", ex);
-//
-//            }
-//        };
-//        client.connect();
-
-//        WebsocketClientMessageSubscribe().
     }
 
     @Override

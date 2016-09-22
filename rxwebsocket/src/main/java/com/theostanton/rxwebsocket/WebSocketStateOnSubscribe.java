@@ -49,7 +49,7 @@ public class WebSocketStateOnSubscribe extends RxWebSocketOnSubscribe<State> {
 
     public void onUnSubscribe(){
         log("onUnSubscribe %s",this);
-        client.close();
+        RxWebSocket.disconnect(client.getURI().toString());
         client.removeStateListener();
     }
 

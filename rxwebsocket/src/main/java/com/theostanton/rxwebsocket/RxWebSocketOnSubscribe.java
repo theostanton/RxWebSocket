@@ -1,14 +1,19 @@
 package com.theostanton.rxwebsocket;
 
+import android.util.Log;
+
 import rx.Observable;
 import rx.Subscriber;
 import rx.Subscription;
+
 
 /**
  * Created by theostanton on 22/09/2016.
  */
 
 abstract class RxWebSocketOnSubscribe<T> implements Observable.OnSubscribe<T> {
+
+    protected static final String TAG = "RxWebSocketOnSubscribe";
 
     private static final boolean log = true;
     protected final RxWebSocketClient client;
@@ -40,7 +45,10 @@ abstract class RxWebSocketOnSubscribe<T> implements Observable.OnSubscribe<T> {
     }
 
     protected void log(String message, Object... args) {
-        if (log) System.out.println (String.format(message, args));
+        if (log)    {
+//            System.out.println (String.format(message, args));
+            Log.d(TAG,String.format(message,args));
+        }
     }
 
     @Override
