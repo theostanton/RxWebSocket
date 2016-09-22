@@ -3,18 +3,32 @@ RxWebSocket
 
 Incomplete / Work in progress. 
 
-Currently holds instances accessable by URL.
+Download
+--------
+
+Gradle:
+```groovy
+compile 'com.theostanton.rxwebsocket:rxwebsocket:0.1'
+```
+
+Summary
+_______
+
+An RX wrapper for java-websocket library. 
+
+Currently holds instances accessible by URL.
 
 Opens connection on any subscription, if not already open.
 
-Can access WebSocketClient via 
+Snippets
+--------
+
+### Get WebSocketClient 
 
 ```java 
 WebSocketClient client = RxWebSocket.getClient(URL);
 ```
 
-Snippets
---------
 
 ### Close connection
 

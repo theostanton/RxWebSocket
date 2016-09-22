@@ -28,6 +28,8 @@ public class WebSocketStateOnSubscribe extends RxWebSocketOnSubscribe<State> {
                 ));
             }
 
+
+
             @Override
             public void onClose(int code, String reason, boolean remote) {
                 log("onClose %s",this);

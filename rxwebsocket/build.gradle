@@ -1,5 +1,30 @@
 apply plugin: 'com.android.library'
 
+
+ext {
+    bintrayRepo = 'RxWebSocket'
+    bintrayName = 'rxwebsocket'
+
+    publishedGroupId = 'com.theostanton.rxwebsocket'
+    libraryName = 'RxWebSocket'
+    artifact = 'rxwebsocket'
+
+    libraryDescription = 'RX wrapper for Java Websocket'
+
+    siteUrl = 'https://github.com/theostanton/rxwebsocket'
+    gitUrl = 'https://github.com/theostanton/rxwebsocket.git'
+
+    libraryVersion = '0.1'
+
+    developerId = 'theostanton'
+    developerName = 'Theo Stanton'
+    developerEmail = 'theostanton@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.1"
@@ -32,3 +57,8 @@ dependencies {
     compile 'io.reactivex:rxjava:1.2.0'
     compile 'com.google.code.gson:gson:2.7'
 }
+
+
+
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
